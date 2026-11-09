@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="es"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwNzU4MDE2NjY0NTg1MDAxNTM4MiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzQyYmVmOGRmMmFlYzMzYTlfaW5kZXguaHRtbC0zMjkifSwiZXhwIjoxNzk0MjI5MTIyLCJpYXQiOjE3OTQyMjU1MjIsImFsZyI6IlJTMjU2In0.iBExFfJfBr7l1ht78rgJvAjr2vsFE9BIXOVAeD4B26OsWqi7wxIJqEHNwtFdzqNc8KlGRKX0lyoXrmwziqKjxAW4B86aNZ9Syukv-YnkWFsfDL_UEP_b-Z_RYrrfu2uGfZNc6sCDpi93y6Cr6tZitkS9edqF5puUWXxZ61l0adDjk1ohklmr0ZbTE7daXPx-zRsXZM60lIWAKI2BIk5o923-KbrTlcJV5RdkiIBSbLPTocDFfM56ov93anb7rkSbQYSiI7ZSe9dRXuVR50BJV-tDY99i54t8waHS4M2JoIIanH1rKsXmb51eptQc9iqMBmp8DAYRkwzEa7i7qaWejw","c_42bef8df2aec33a9_index.html-329")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Usuario - Mantenimiento Preventivo | INTERCOS C.A.</title>
+    <!-- Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#026597',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active {
+            background-color: #e0effe;
+            color: #0369a1;
+            font-weight: 600;
+            border-right: 4px solid #0284c7;
+        }
+        /* Transición suave de contenido */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-y-0{top:0px;bottom:0px}.left-0{left:0px}.top-0{top:0px}.top-\[57px\]{top:57px}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-6{margin-bottom:1.5rem}.ml-3{margin-left:0.75rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-video{aspect-ratio:16 / 9}.h-10{height:2.5rem}.h-12{height:3rem}.h-3{height:0.75rem}.h-4{height:1rem}.h-6{height:1.5rem}.h-9{height:2.25rem}.h-\[calc\(100vh-57px\)\]{height:calc(100vh - 57px)}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-36{width:9rem}.w-4{width:1rem}.w-6{width:1.5rem}.w-64{width:16rem}.w-auto{width:auto}.w-full{width:100%}.max-w-2xl{max-width:42rem}.max-w-5xl{max-width:64rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-full{--tw-translate-x:-100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-4 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-0 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0px * var(--tw-space-y-reverse))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-gray-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(243 244 246 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity, 1))}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.border-brand-100{--tw-border-opacity:1;border-color:rgb(224 239 254 / var(--tw-border-opacity, 1))}.border-brand-600{--tw-border-opacity:1;border-color:rgb(2 101 151 / var(--tw-border-opacity, 1))}.border-brand-700{--tw-border-opacity:1;border-color:rgb(3 105 161 / var(--tw-border-opacity, 1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-gray-100{--tw-border-opacity:1;border-color:rgb(243 244 246 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-purple-200{--tw-border-opacity:1;border-color:rgb(233 213 255 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-brand-100{--tw-bg-opacity:1;background-color:rgb(224 239 254 / var(--tw-bg-opacity, 1))}.bg-brand-50{--tw-bg-opacity:1;background-color:rgb(240 247 255 / var(--tw-bg-opacity, 1))}.bg-brand-500{--tw-bg-opacity:1;background-color:rgb(2 132 199 / var(--tw-bg-opacity, 1))}.bg-brand-500\/30{background-color:rgb(2 132 199 / 0.3)}.bg-brand-600{--tw-bg-opacity:1;background-color:rgb(2 101 151 / var(--tw-bg-opacity, 1))}.bg-brand-800{--tw-bg-opacity:1;background-color:rgb(7 89 133 / var(--tw-bg-opacity, 1))}.bg-brand-900{--tw-bg-opacity:1;background-color:rgb(12 74 110 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-900{--tw-bg-opacity:1;background-color:rgb(17 24 39 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-brand-900{--tw-gradient-from:#0c4a6e var(--tw-gradient-from-position);--tw-gradient-to:rgb(12 74 110 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-brand-700{--tw-gradient-to:#0369a1 var(--tw-gradient-to-position)}.object-contain{object-fit:contain}.object-cover{object-fit:cover}.p-0\.5{padding:0.125rem}.p-1{padding:0.25rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-4{padding-bottom:1rem}.pl-3{padding-left:0.75rem}.pl-9{padding-left:2.25rem}.pr-3{padding-right:0.75rem}.pr-4{padding-right:1rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-brand-100{--tw-text-opacity:1;color:rgb(224 239 254 / var(--tw-text-opacity, 1))}.text-brand-600{--tw-text-opacity:1;color:rgb(2 101 151 / var(--tw-text-opacity, 1))}.text-brand-700{--tw-text-opacity:1;color:rgb(3 105 161 / var(--tw-text-opacity, 1))}.text-brand-900{--tw-text-opacity:1;color:rgb(12 74 110 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-gray-100{--tw-text-opacity:1;color:rgb(243 244 246 / var(--tw-text-opacity, 1))}.text-gray-200{--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206 / var(--tw-text-opacity, 1))}.text-purple-800{--tw-text-opacity:1;color:rgb(107 33 168 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-rose-800{--tw-text-opacity:1;color:rgb(159 18 57 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-brand-100::placeholder{--tw-placeholder-opacity:1;color:rgb(224 239 254 / var(--tw-placeholder-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.ease-in-out{transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1)}.hover\:bg-brand-100:hover{--tw-bg-opacity:1;background-color:rgb(224 239 254 / var(--tw-bg-opacity, 1))}.hover\:bg-brand-50:hover{--tw-bg-opacity:1;background-color:rgb(240 247 255 / var(--tw-bg-opacity, 1))}.hover\:bg-brand-700:hover{--tw-bg-opacity:1;background-color:rgb(3 105 161 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-200:hover{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.hover\:text-brand-800:hover{--tw-text-opacity:1;color:rgb(7 89 133 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-brand-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(2 132 199 / var(--tw-ring-opacity, 1))}@media (min-width: 640px){.sm\:mr-1\.5{margin-right:0.375rem}.sm\:inline{display:inline}.sm\:w-56{width:14rem}.sm\:w-auto{width:auto}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}}@media (min-width: 768px){.md\:sticky{position:sticky}.md\:hidden{display:none}.md\:w-72{width:18rem}.md\:translate-x-0{--tw-translate-x:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:p-10{padding:2.5rem}.md\:p-8{padding:2rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}}</style></head>
+<body class="bg-gray-50 text-gray-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-brand-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="flex items-center justify-between px-4 py-3 md:px-6">
+            <div class="flex items-center space-x-3">
+                <button id="mobile-menu-btn" class="md:hidden text-gray-200 hover:text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <!-- Contenedor del Logo de INTERCOS C.A. -->
+                    <div id="company-logo-container" class="relative group cursor-pointer" title="Haga clic para cambiar o subir el logo">
+                        <img id="company-logo-img" src="data:image/png;base64,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" alt="Logo INTERCOS C.A." class="h-9 w-auto object-contain rounded-md border border-brand-700 p-0.5 bg-brand-800">
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base md:text-lg leading-tight">INTERCOS C.A.</h1>
+                        <p class="text-xs text-brand-100">Manual de Mantenimiento Preventivo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Search Bar & Download Action -->
+            <div class="flex items-center space-x-2">
+                <div class="relative w-36 sm:w-56 md:w-72">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" id="global-search" placeholder="Buscar en el manual..." class="w-full pl-9 pr-3 py-1.5 bg-brand-800 text-xs sm:text-sm text-white placeholder-brand-100 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 border border-brand-700">
+                </div>
+
+                <!-- Botón de Descarga / Guardar HTML -->
+                <button onclick="downloadHTMLFile()" title="Descargar este manual como archivo web HTML" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-md shadow-sm transition flex items-center shrink-0">
+                    <i class="fa-solid fa-download sm:mr-1.5 text-sm"></i>
+                    <span class="hidden sm:inline">Guardar Web (.html)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Body Container -->
+    <div class="flex flex-1 relative">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="fixed md:sticky top-[57px] left-0 h-[calc(100vh-57px)] w-64 bg-white border-r border-gray-200 z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col justify-between overflow-y-auto">
+            <div class="py-4">
+                <div class="px-4 mb-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Navegación del Manual
+                </div>
+                <nav class="space-y-1">
+                    <a href="#inicio" onclick="showSection('inicio')" id="link-inicio" class="sidebar-link active flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-house w-6 text-brand-600"></i>
+                        <span>Inicio &amp; Bienvenida</span>
+                    </a>
+                    <a href="#introduccion" onclick="showSection('introduccion')" id="link-introduccion" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-book-open w-6 text-brand-600"></i>
+                        <span>Introducción y Alcance</span>
+                    </a>
+                    <a href="#hardware" onclick="showSection('hardware')" id="link-hardware" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-microchip w-6 text-brand-600"></i>
+                        <span>Rutinas de Hardware</span>
+                    </a>
+                    <a href="#software" onclick="showSection('software')" id="link-software" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-compact-disc w-6 text-brand-600"></i>
+                        <span>Rutinas de Software</span>
+                    </a>
+                    <a href="#checklist" onclick="showSection('checklist')" id="link-checklist" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-square-check w-6 text-brand-600"></i>
+                        <span>Checklist Interactivo</span>
+                    </a>
+                    <a href="#bitacora" onclick="showSection('bitacora')" id="link-bitacora" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-clipboard-list w-6 text-brand-600"></i>
+                        <span>Bitácora de Control</span>
+                    </a>
+                    <a href="#glosario" onclick="showSection('glosario')" id="link-glosario" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-spell-check w-6 text-brand-600"></i>
+                        <span>Glosario de Términos</span>
+                    </a>
+                    <a href="#video-tutorial" onclick="showSection('video-tutorial')" id="link-video-tutorial" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-circle-play w-6 text-brand-600"></i>
+                        <span>Video Tutorial Real</span>
+                    </a>
+                    <a href="#faq" onclick="showSection('faq')" id="link-faq" class="sidebar-link flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fa-solid fa-circle-question w-6 text-brand-600"></i>
+                        <span>Preguntas Frecuentes</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer Sidebar Info -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50 text-xs text-gray-500">
+                <p class="font-medium text-gray-700">Departamento de TI</p>
+                <p>INTERCOS C.A. - Versión 1.0</p>
+            </div>
+        </aside>
+
+        <!-- Overlay for Mobile Sidebar -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 md:p-8 max-w-5xl mx-auto overflow-hidden">
+
+            <!-- 1. SECCIÓN INICIO -->
+            <section id="inicio" class="content-section active space-y-6">
+                <!-- Banner Personalizable de Logo & Datos -->
+                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-4">
+                        <img id="main-banner-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAT8AAAB7CAYAAAACGIdlAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAD0GSURBVHhe7V0HeBVF11aq5fMr/pZPASl2xd4LKjZaQkdpSm/SEVSKgAIqWMEPBRUhnSQkhIQQIIEESEKHVAJJSALpvffy/s87Nxtu9u4mNxAgkHl9zoPZu9N2Z949c86ZmRsgISEh0Qxxg/qChISERHOAJD8JCYlmCUl+EhISzRKS/CQkJJolJPlJSEg0S0jyk5CQaJaQ5CchIdEsIclPQkKiWUKSn4SERLOEJD8JCYlmCUl+EhISzRKS/CQkJJolJPlJSEg0S0jyk5CQaJaQ5CchIdEsIclPQkKiWUKSn4SERLOEJD8JCYlmCUl+EhISzRKS/CQkJJolJPlJSEg0S0jyk2j2qBJShaqqKlQKqURFVSVKK8pRWF6CvLIiZJXkI604B4mFmYjNT0V0XhIicxMRkRuP8JzzOJweCb+UMPgmh2JvcjC8k4KwO/EkdiacwI74Y9gefxTu5w/D7dwhuJ07LP7m9Z2JJ8R9e5KCsTc5BH4podifEoaQrDicyonHmdwEURbLZNmpRTmiLrmlRaJupZXloq4UQ91FS8R/EnVDkp/EdQc9MiuvqkB5ZQXKKg2kRhJJLMjEmZwEHE47IwhpQ9RufB2yGVMO/4aBvitguecr9PRZjHd2L0A3r3l4yXMWnnT/BI+6TcJDWyfi/q3j0dl1LG53HIab7Aagrd0AtLEbgNZ2A9DKrj9a2fZHS9v+aGHbT8iNNn1xo21f8f+8zt95H+9nOqa/yW4gOriMRhfXcXho6wRRFst8cfssUYe3d81HD+8vRd0G+q3AnGN/YVmIEzZG+8Ar4RiOpEUiKicJyYVZyCkpQElFmWg3228gSQNR8vk0Z5qU5CdxzaGG3FCb3MoqK1BcUYb8smJkluQjuSgLsXkpgti2xAZgeZAjJh38H/r7rsA9W0YbCMmqJ1ps6okW1r1wo3Uf3GhjKQjqBtt+15SQUG+0scCN1r3RwqoXWlj1EP+SVF/1+gyTD/6Gb4Kd4BLrjyNpZxCbnyKeT1Zpfi0NsjkRoyQ/iWsGgvSqyY7aDDWbI+mRcDt/CCvDXPDJobUYtf979NvzFV71mouOW8fjP07DcQPJzMYCN9j0qf6XYokbbK89kmuwiLZbGtpsrbS9L/7tOBydto7H617zMMR3BSYGrsHvZ7zgEX8EJzLOIq0oR2jIfNbXKwVK8pNokjAmOmp0nL6FZMbizzO7MNDvWzznOQO32PTBzVY9cPOmHrjJuhdusu6Nm6z7VP/bG21rpJfhX5s+aGtjgba2loZ/xXVF+Hv1PdZ90MbGolos0dq2L1rb9kMru36GaartADFlbWnXHy1UcqOtsWiQURMU1pPSwsYCLax6o6V1L7S07YvHPKZhbMCv2Hn+OFIKs1FcUSrehaIhXuuaoSQ/iSYF2qboYMgozkNEVjz8kkLgHBeAnyPc8evp7XCK9YdPUjAOp59BUGYsIrLjEZObjPj8dDFAmS6ntBB5pUVCOAUuqJbCshIjMVzjPbyf9r/04lyhTSYUZCA2L1XkfSwjCvtSwoQ90CF2P9ZF7sTqCHf8eMoNs479hamH12F84BoM27cSlj5L8PauL/Dyjjl40mOqsAMK259t3xppSZLRJEtTUrq6YtCKlel0G7t+eHnHpxixbxVWBDvCPna/0LppXrhAiNcWHUryk2hSoLYnjPNGA6qpQrE5sq6chheUFyO3rFDY0dKKcxGTn4KwrDhhY/M8fxS/nvLAlEO/49Wdn+Nxj2loTU3SxhKtrPugpQ3F0uAUabLaIwnRQOA32Q/C7Zs/RHvnkZh25A/huc4uyTdyqjR9m6EkPwmJywyDg+aCk4b/lVWUI6M4F6eyz2NX4gnYxfjh+3A34b3tsWsBXvSchY6u4/Avx2EGbVF4iA2eYlNSurqiOFrud5uIPnu+wo9hLtiTHIz4gvRqu2HTJEFJfhISVxkKMZIk6HXltD+pMEvE+R1Mi4Bz7AF8G+KEUf4/441d89GGNkgbC7RiuIzdAKPpsykxXWkR02Tbvvg/x2Ho6jYJ046sw86E48L8QA25KTlQJPlJSFwDUAiSGiNtkr5JISK2j/GHT3lMRSeX0bjDabjBESM0xSZCiAwdsu6Dx92n4MsTNjicFonU4hwxPb7aNkJJfhIS1zBoX6OzJjz7PPanhmNtxHbMPLQOL3jOxi32A9GC5CO0MQ1iuqJiCDe6w2kE3vdehFVhLojJSxHa4NUiQEl+EhLXCYynzySVhPwMbIrag7GBv6L9lo9wx+YPcLP94OppspqcrpyI0BobS9zh+CFmHvkDp7PjhbPIMCW+cpDkJyFxHYNkomiHQZkx2Bi9B1MPrsXznrNxt/NItLKlh/nqTZFJgu23jML4wNXC8cPVJlfKLijJT0KimUFohlUVIj5y7SlPPOs5C60ZakOP8lVynrC8tjZ98dGBHxBfkHFFwpwk+UlINGMIJ0plOSJy4sXytnEBv+DRbVPQUmiEBlJSE9XlFGqC92z5GLOP/IGo3CRBgpcLkvwkJCQESIRF5aViw4OtcYHotfcrdHEdK1amKBqhmqwul3CnG+6gs/XcQRH+czm0QEl+EhISmuBqm8icJLGc702vefjvlo+rw2iunEZ4m8MgLDphg7j81EZ3iEjyk5CQqBPUCLNLC3Aw7bSYjnZ0GS3sg1dKE+RSuoF7vxYbvJIAGwuS/CQkJMyCCKWpqhKbPxgCrOfjP5uHXhFNkPk/7TFNxDPSDtgYGqAkP4kGoyEdzxB7Vj8urHpV/qsfSlybOffXvrf++41RXxtM8zavDPPvNM2/LtT9q7q+FwempG3QJS4APXy+xL8cPhCrSy6nNshNZh9wHYcDqacahQAl+Uk0CKWVZcgtKxLbGNWHyipuT1VYfb/2dIWDqLiiROyGYiwF5SUo1+ngTMPpT1F5iZiOZZbmI0+sHdW+31CPolr5c61paT2rC0Tdyg11yy8v1byX9VDnrQivF1eYPica70sqSpFbZqh7TlkhSirKNfOnpsXYN9N8y0ycAIZnyXy1nzd/Z/BzfnmR2Hkmq7RAPOeKS9x4gN5i5zh/dNv5GW61H3RZg6hJrnSEJBdlm7S/oZDkJ2E2SCI/nlyP7jsX4UDauToHDAft8ZST6LZjLl7bMQ/bkuI176+oKMWk/V/htR1z0I1nVGyfhdc956CX9xJ8F77ThDw4TDOLsrDxjCcG7VmK5zym4VG3yXhz53x8FbIVMQU5JuXEZEdV12MOunnOQjfP2Xhv10JMO/w3ovOzNEmHKCjJxpSAH0W6HnvXo1iD8BNzzuJNj+notn02XmcZXnPxOsvYPlOIQ0JMrfzLK8qw47w/xh5YhVc8Z+Ixt0l40fNTTD2yAcezadSvXZe80lzMDPwFr+/41JCv5yx03/k5hu//CXtSYwRxKajg+wnahNd3LEB4bk6tfEjS4ZlRWBFki/d3fY4ntk3GE+7TYLFnGTadPYi88jKdp2AemJYfos0x+/DSjk/xH8ehl40Ab3EYjMkH/yeI+1IgyU/CbJSWF+Mdj/G403k8Dmcl1TlYCkrz0M97vuGcDBtLzAn2MxnY4r6SbNxp1wv3uE6FU+xBeMUfw9+n3dDRZRRa2/SDXfzZmnJIIry/v/fnuMnWEi95fY55x22x9IQVHnYbJzbcHBXwF7LKqKVdwL4Ef7ET8zt7VmJr7EE4nfXFgL2L0cqmL0YfctCMJauqqoTbWS+xizPbcKvDGCQUl5i0Ob8kD36JwdifFIynXYaL1RIzjjtjf3Io/BJDkVliqAvrXlJWiHmHfsLNtn3RyWU8Pgr4DUtOWOMlz+mi7s+6z0Nwbm0yTi5IwSsen+CfzlNgFbUP2+IOYu7htbjNYTCe8JiHs4V5NfeWVZRi6J5FaL15PJKKS2uu80N0Mvk4HnIdLXawfsRjDuYc3YA+PvNxk11//NNhMNZHHWqUradYVkllGRYH2Yk6crfryzEVbmndB5tjDmi+O3MhyU/CbOQWZ6Kr61g8vG0WogvydAcKh9CBhENo5zQS97l9gn/YWuJp79UoqajdUZk+MTcWbawt8L7vGhRWT/2owawJ+kt08NVnw2vKySnOxke+S/GvzcOwKMQd2aVcD2o4bCcpPwnv7fwUt20eCa/kszVES231s4O/iC2gVkVWD/CqKiRknxXb1r/i/T1KVVNE1iG1IAUvuk/GbU7jcZfjB7jJdggOZaXrtrmishzvug3FrZs/xgkNDa6isgJrQx1wk21/9Nv3K6LyMmvqUlhWiAVHfxMbms456YYSIw3zUNJR3GrTB90P2IupLOuWW5yFrm5j0c5lEg5nJtXcm1eUibvsLfDgjlUoqtGYq3AqPRwPuo5Gp63TYR0XhOIKQ9xceWU5dsTuwT9s++Jxz8XIL9eeel8MOL32TQ7BqAM/4jaHIWIqrCawS5VBvsuRXnKB/BsKSX4SZiM+Nxb3b/kIL3stF9qVFjh4ysqL8JHvYvyf62yx1fy7O6ahjcNkpJbUnqbw3hMpx9DaxhKTjzgZbHxVTF+K2f7f4D7XGYgpKKi53yvOD/9xGIyPD1qJaZo6ryPx+9DK2hILwvbWTAfLK0owZt8ytLUZhN2phqk3743PjkQb617ou/8vUa4xOEW0Pe0qiGpIoAcG7fgEra37YkvCaRNSU1Bclo9ODpbouO1TxBeZfhgyC1LwvPskdN72BeIK81W/V+FsZgRa2Vjg/T0/IKfm2VZhe/QOtLLui1+iQ6ttcyS/TDy+dQwedJuB8LysmlzOZUXiZptemHBiV41GRG19lN8ycRzmT5EHTepfUVmGaQeWo43dUATn5Jv8fqnILyvCmlPuwlHR2Bog1yYfzYhSF2k2JPmZCXGUXx3SVKGup1oagsCko7h78xC857fORFtSQE1rV6wP2toMwIKQ3SgqL8LwvQvR2nowDmdl1LqXU8uNp5xF4Ozru5Zi3SkP/B7uhvH7v8V9rpOxNSG8ZjBy0H92aDVa2/SFU2KshoZShdj0YLSytsDMoF016QrLCjDQZz7a2g+DV1KkOGj8RPppTPL/Fve5TIB7YoRJXlmFqXht+yd4YfdK5JWV4vsTG9DCujfmBXuhXOeZpRck4h+2/fDq7hXILK09PWb++8/5irp9eeqw5lQtLe+82M7+Te/vkFVm+Ejw/fwWYoWWNoNgHRcqDjCPyDmHX0Lt0c55JBYGe6K4WptmGQHn/NDSui/+jouoIf+0wjTRlru2zEBsYaFJW/kOfji+Di1tB+NI1qU7EbTAMncnnsBLO+aId91YtkB6f9ed9lIXZzYk+ZmB8vJyODk54ffff8cff/xRS9avX49169ahRKXVNAVUVlZi27ZtmvVmnV22uIh7zAE78LpwJ7S1tsCCMF/NQcJ7MgrT8KbnTHR0nY7j2dzGvBTT/FeitU1vbDwfUev+8spSjN23Aq3tBuGVnV9gsO9yWPp8if84DMHDHp8hIje9FvlN3L8crW2G43SBWnMyEMWBcz5oZd0Pq6OOVNuvqpCYl4gHnYeLk9c6b/kYD7uOQ6cto/Gi13xsORcsptrGoEPi56BN+IfDUNjGBQuiOpgQiBY2fTDukG2tKakxTmeE4Wbbfhiyf73RlNMA1mO6z0y0tB4Mn7Qkk2fH38+kh4lp/sB9v4npJ1FZUYa3PCYIm2N7pxF4xHUcHnQZi4fcPsFPEXuQUVpc8xxIYhvCrNDSdjiOZaXUtD8kLRx3OwxAB89vUVBB73Zt0OH0jsdYtLQbibhC7qiivqNxQG36dE4CevssETtQNwYBcp/C0f4/m7TJXEjyMwNZmVl44okn0L59e3To0KGW3HfffRg/frzZJHIlUVZWhqFDh2rWm9e+//57s7U/DqQVJ/5Aa5v+cEq44IQwBjv4lmgv/NN+ILr7/onEwmykFGXhs4M/opWtBRaH7ak1uIrKCjDIZz7+YT8CgZmGAUuy4VS4lU0fjD3sVKPBsPwJ+5ahtc2HCMqlR/dCPvy/wtI8fOy7FP/dMgFHM5PF7/yP9q5/2lrgPb/f4XkuAHdu/gC3bB4N3zQt7RGIzopGpy0j8ajHZwjOThYnuh1PPoYW1hbosfdn5JVrTfer4BnjI47EnHjM1UQ7ZDl2pxzR0nogtiWdM9H8yivLsCbEDq2se2NlhF9N+sKSbNxtb4GunotwICUc/X0WoqW1Baaf9DQJ6ykrL8bD9pa41WkyzhXl1rQ/OC0cd9oPQDuPr5GrsukZSDcct9J5tHuVbmhRY4K2wGH7vhOn2l0qAZL8LPZ+fdF1luRXD0gOkZGReOihhwTRacnvv/1uNolcSaSmpKJdu3Ym9aWQ/Pz8/MyuN4ltduAPaG03FKG5+eqfBfKLs9Br1zy0sO6DOx1H4FWP6UI6iO3V+2FYwF8oqf5IcOBlF2fhnR0z8W/nT5BYXD3Vo7aWHY02Nr3Rd/8GI6KowsIj/xOnnX0VtkeEwCgDnIZ7qzPuuMWuH4b5/4ncaoJi2/ad34/W1n2w7EwwyipKMDfwe7SyHYw1kYdMyI9/f3diQ7UHdAhe3T5DhKu86D5FDNQHts9HemlhrTQiHZ0qh9aIctZEH9XUng7F+4tpbe/9f1VPiw338N6DScfR1W08Om6djYi87JpaJeScxc02FhgSYCWeg1PUDtxs3x8WfmtNQlNyClNxq40lXtm1HNllF6bdmUXpeMNzBm7b/BHckyKrg4MNJg86iQZ48+MzBOujDdrylUBCYQYG+a6oPpDJlNTMFZLfAL9vJPldLogB5LdPl/xIIsFBwWaTyJUC63PixAnccccdJnWmUPvLSK9tg9ODIJiKEjzg2B+tHMYjKj9LBOYy2FYJdqaH1j7CGW1sB2HS4b9hHbUXVlF7hKwMtkcbu/7o7rMK2WWGQcs8wzMicLudJf7j8hliCrKQWZKHuLxEzAz8Abc7DscfKiIJSQ9HR+eP8G/H4ZhzwhGHUs/AL/E4JhxYiXudR+KVnUtxOo9ajwEkbJtTm9HKejAOZGaIvGIyQoV3uavXt2J6qtzL+qTnncejW8ehm/dy/BnpAyvRhr3YcMYLdzj0Qyv7UTiVl1lTHwXlFaWYsH8FWlsPgm8aQ4BM+wJtn4N9FqK1rSV6+v6A3YkhOJgShoVH14mD0R/cNh0BmRem+cSRxEC0se6PxSFe4npafgLucBiMu12mINzIJEDQYdLWxhKD96+vNZWvrCzHb2EOuIVHTTqNw5rTe3AoJQLWZ7bjAZePcbNdf4w/4ohCoRVeGbCc0ooydN81H63sBpiQmrlCm983wc7q7M2GJL96wOnsH+v/QKdOnUwIhPLcc88hK+uCx62pgPV2dXHFvffea1JnygdDPhC2THPAwZxbmIp/2fQQsXcvecwQwbbven2BfWnnxT1RWZFoZz8A73p/h8TiAoNDpfq/rIIU3GrTCw9v+xQJRQZ7Ha/7x/vjZuueaGvbH49vnYAn3SbiNrsBeMhtClaEbkdqCQ30F8BwEt/4g+jrsxD/sh+A1ta9hAPkaY9ZmHvcHjEFF4hPuX+2/3L8n9MkpJcYtCGSeB+v6WhjZYGN5yJqPlrFZQUYtXch7tg8Cj6pcbXqX1lZgXkHFqONlSU2G8UdKuD0feCueWhrOwzRBUUmvxPMLyIzCmP2f4f7tow01N3aAl1cJ2CE/6/YnxZTi8xow1t+dA1utRuITTHHRZ70zH4asAKtN/XG3ODdtQKcfc7tx01WPTH3pJvJ6g6aBNaEOeHF7dOFRt3aujfu3TIKb+9ejN8i/VBwBYlPAcs7lh6FZz1mXHQYzM32g7Aj4Zg6a7Mhya8ekCA+//yLGvueWmhTKy3VsgNdXbDeUz6ZYlJfCtuycMHCBmmrDKANy4hFqJGcyjqPguqQk8ziHIRnxiGxsDYBERzIp7PPITwrXiwpE9cYl1aSXyu/kIxYRGQnIru0yMQupoBkRK0hPj8NYZnncDY3FYXlpZr3896YnAREZNd2MqQXZYm2xOYxoNiA0opShGbGIjo3xYQ8CAYzh2XGIbXYdNrLss/mJCIsK7EWIWmBNq+M4hzx7M5kJyKrpFB3qWBCXgrCM88jp9r7SxSXFyE0IwYROSm1NEzmGZYZi9RiU2cQQS24oKwIUTkJomzaY0sqyxvUBxobrP/KMFexX6Ca2MyRh90m4UzuhTjHhkKSXz0gsX3wwQea5NexY0fMnDETFRrrN6828vLyMHz4cJM6K+RHj6/mKKkDF3ShC//V/l0/S8Nvpr+q8zPNVRvm3q9VJ6UuptdNrxmjrt+1ytHDhfL18yMaWk9z6nCh3PruvDIoKCtGD+9Fwv6nJre6hDs+LzxhLdY4Xywk+dWD3NxcvP/++yYEIsivU0esXLnyqn499ZCYmIh3333XpM6Up556CoGBgeokEhJXHBw57ucP43bHYQ1yftzvOlbs73cpJC7Jrw6Q1IKDg9GunbbdjE6Q3bt3q5NdNISd6SIDkNU4deoUnnnmGZM6U15++WWcPn1anaTBUNe3Mep9sbiU8tX1V0tjQ53/5SpHgbqcy11eQ8Fdmh/bRo+6ebY/7hyz9rSnpqmjIZDkVwfYQexs7XSdBo888gjCw8LVyWqg7mx6nY7X6KAoLipGdnYOcrJzUFxcrHlvfVDK2L59u/BEq+tM6dHjfaSnp9euUwOKUtLQJMAYSIbUUOj44TW9djYE6memV0dep9khLzcP2VnZYrrP+EZzylfS5ubkIiLitAj98fb2xh6fPThx4iTi4+Mv+j1ogfmwbmmpaYg4FSGiBPhxjY6KFu+cdtrGKotQ2sd3FHkmEkFBQQgJCUFsbCzy8/NFn2vM8i4WnPr227PULMcH75kY+CvyyxngfWl1l+SnA6XjTJ40WdPeR3n0sUeRnZ2tTirSnos7hy3OW8QqCrV4eXmhsLBQdD6m9/cPwJeLFwsb3b3t7hWxedTaFi5ciAMHDiAjI6PeTlpQUAA3NzeRv9tWNxF4rVfvV199FbY2trXqxLomJSbplsPrJIKEhARRzpLFS0R977nnHtx5551C7rn3HrzxxhtYMH8B3Le5i3vNJSIFHKge7h4mz4zi7u6OnJwckR9X1ERFReG3337DpEmTRLv47GiH5TvTCzpX0rJu9nb2mDZtunhO//3vf2uePYXtuvvuuzFi+Ah8v2qV+MiRWBvSFoJ9iCFFhw8fxtKlX2Hs2LHiObG8/95jEJbDOkyYMAHrfl8n4kpJTg0tSwHLJHGzfVOmTBEB+iyDbVLK69y5M+bMng2vHV5ISUlp8HtqTFRUVuKj/avqJb82dgPRY/cCcapbY8QkSvLTATsCNQJ2FDV5UNhZP/74Y81wEab98YcfxSDSWlnRq1cv5Ofli68wSerZZ5+tWYVhnD+vPf/88xg1apTQRvQ6J68zr0cffRQdOjAfbY1PXX91vcLDw03K4N+VFZU4duyYIOO33noLXbt2Namvut5dunTB2++8jTVr1gj7ozpfPdAWyfzV9aO8/fbbSElOQVpaGn7++We8/vrreOCBB2rq0eE+Q9krlq8wIT/RjspKxMTE4KulS0U7lHzVbdBqz4svvohp06bh+PHjZmlM/J3a9dq1a2FpaSlCovSemVJ3pawXXngBn3zyidAKzSlLAe/LzMzChr82CHsv34FuedVlkRgt+ljAzs7uqhEgiWxs4GqxjE9NeIpwRchA3+U4m1fby30pkOSnA3aCU+GndKe8vG5ra2vSWfi30Bgna2uMvDb0w6E4dPAQ3nvvPZPftYTazPvvvwfP7Z4mg1opc8eOHXj44YdN0porvXv3rtGqjFFUVARrK2vRXq321CcKacXGxGrWXY2/N/xtkoci1DRJfPPmzsNjjz1m8juF2pu7u4dJWRzYu3ftRv/+/U3SNETo/LK3txf56YHvPyQ4BB999JGu6aE+4XN748038Oeff5q9bpyziS+++EKQHvuMOs+6hO93xowZZs0yGhsMwxnl/xNa2JmSHoV7AvbYPR9nchMbjfgISX464ODhNEur87Jjcepy4vgJdTLRcTh1e+WVVzTJgtdeevEloaWpf6tLWObAQQMRHR2tLlKUySV27PTqdOYI8x45cqQgOuM8OXVftGgRHn/8cZM0DZVu3V7H/n37TUjJGCyT02mt50Z55513BAE+/fTTJr8p8njXxxESElprANMWuWb1Gjz55JMNJgW1MD2Jd8OGDZpaP80PVlZWQlNUp22osCxqtowoUGypeiBpffbZZ0Jrvtg2Mt3PP/1cJ7FfDpRUlOFDv280p71cmTL54Nrqoyv1238xkOSnA3ZsaiFaA5GdpEePHsJIrQY7aGhIKO666y6TdI0hy5cvNxkEJJRpU6eZ3GuusD3z5s1DRXl1AHJVlRhMc+bMqZdQmdZY1L8b30dNNzU11aT+CtiOcePGaT5zc4RlkCBpw2IZFBL6t99+W287GiIsh9NUJ0cnk/pTU+OHra5n0XDpIKb5evGkSrldunTWSGsQc95Tv379EHQySPf9XC6kFGXj1R2f1vL2MuylpVUvfB3sIBwil6NO1xX5USXm1yGpMBO5GgvQGwIOGhqn1R1E6Ug0hGtpMbzm4uKiO102zkPYXYSNzmB/MWfQ06FAzVIBOwWJevDgwSb3mitcuufo6FiTZ2FBIZYuWSq82ep7FWFdaY/s0bMHBg8ajAEDBqBbt251aolM8/lnnwvHiRpsB438dMao09UlyrNTNPSBAwfWTN+pwVAjrqtOSh7Ks1eIQXkfHe+rTRT8neaFxYsXC6eCgtLSMlhZWdeplSplifo28L2/1f0tXc2ZDpVePXvqkhrter179caQIUPEtP+1115Dp84Xlmvyw8BA/iNHjmjmf7lxPCMa7beMEuRH0uOxB912fg7Xc4GXHM5SF64b8iPxlVWUwzZqr9g5lidKXSw4cOiF5ZdQ3ZEo7GSLFy/R7CgkojGjx5ikUUu79u2EjYUeOTozHBwcMH36dM1ptrGQVI8fO15THuvKMBNep8dVz0FDYb2V++68y0juvFN4lQm2adOmTbqaEvPgYPp19a84HXFaGPUZCE7CSUpKws6dO/Hhhx8KzUgrLb2MB/YfMPmS82/mR4+kOp2W0JnEOEs6Ib5c9CUWLFiAuZ/OxS8//1JjuN++3VNMG9VpjYXPg/bZzZs3i+dKx9GRw0dgY20jtFD1R4zaq42NjbCvGbfB29unzo+FUtagQYOwYsUK8bHZ6uqKX9eswcSJE82arvJjrP5wsA5HjxwVz1V9P/MbNmyYCOHhe6K3mv363Llzon0ieL/jfaJOdDSp38mVAMfttEO/o3X1iW93OA7DF8c2Iakwq1EPKNfCNU9+1PS4VbZ34kn02bNULLiPy09T39YgsBPwq06vm7pDKfL3339rdhbGm1lYWNTZkTmASHicxpBsFCFxcjMCegbVaYzFWEsjaA+Ki43D+XPnRSd+/oXnTdJQSASurq6IPx8v7lWEtj1lfXJERISuverBBx8UoROMF2Pd2X7jZ8D/ZzuSk5MFodx///0meVDjIVmpjfhMR1Kpi/z5TEkS/CgxNIdTcz4z9TNkPc6fPy8cDnrvgXY7Onn4HkiWTKu0R2kHiYYhO3369BFpBg8ZLIhRuVdpc3paOvr17adbFkm6+1vdxcaySoiTsbD8Awf8RciO3u5BFIY/0QmnfuabHTab3Evhs/zrr79q3pVxGpbL2D9+qBjbyL+vBo6lR4vDqm7bPASves7GtvOHxfrnxnRs6OGaJT8+HKrER9IjMTbgJ9ztNBKdXUbBP+XUJT82doSDgQdNvvqKcBpFTUlNfvybX1VO/9RpFKFNinYVPfsNp9u0v6nTKdKx433CFqkFlk/NhaEzpuk64s0336wz7ITXV373naYWQZk6dSqSk5J10yvg7wyb4fRKnQelZ4+ewmtrDD4Par56BEKhw4I2T8bo1TVYWT7XLutpr5xmMhaQBFlXPgTJ9ODBg0JL17qfZa1bt15Xw+R1vk9+ZNRpjSFIND0d8+bO1fxoKPWmA8o4H6aztrY2uVe5n89LxAxWmgae829+QOqq1+UEDz0fue87PL99JmyjfZFalHPZtT1jXJPkR20vqyQfmyJ9cI/zSKEut7LrjwmBa0xe8MWAA5EGZE5N1R2Kg5MaITUtNVh2WGiYJvlQSCobN22qs478be/evXVO/zhV1gI7seNmR03tifUeNHCQmKJqgeVyWqQXfsMPQVhYWJ11NwbLoY1JnQ+Fdj0G8hqD07G6HAW8zphIDuT6QI8rtW91HoowzpLab0Og126u1uAz06s365wQn6CbXg1+NJ59Trv/kMyoqZXyOEwjzdPX11f3g8WpOO2s1OhpmlBrgVcL1O7WnfbE10H2yCutbUK4UrjmyI/ann9KOCz3LsXt1Qcj01Da3mUUjl3CSU7G4NeeUxAtQzQ7OZ0O7EhqkHy4OkHry810Pd7vIaaEdYGdgMGterY7EjI3V9UCO/YPP/ygSX607dCGpbf9FuvOKZ6etsvB5ezkLFZ3mCM880RvQwhO7QICAmrKZpu5Frmu+DQGJXM9cn2DhL9zvbVeO3idS//0NO+GgGVx+q23WzY/gseOHmuQZsW+t3TpUu13WF1/2laNnwP7VPfu3XWfneKcolOK57lwtUljLtu7GGQV54szPa7UFFcL1wz58QExHujPM7vwgOvYWjtAkPxe2zEXqcWmhHQxILGxo+gZ7bmCoLw6LMQYCvloDQZ6VMeMGVNvDBU7pL+/v1j+pM6DwuucQmmBA2f06NGapM1rnB7pdXjDvoWfa6alsN3K0i9zhMHG6jwU4bPYs2dPTdmsEwnd2ANZq+73dcDGjZvMIhHe8/XXX5vkoQgdAGqnwcWCH5IxY8aiQwfTciizZs0S9dF75lrgvXv37NXsQ5S77roTUZFRtfJkn/rll190p/mK8B3y/ZJA2b/5oaa2b85zvRww/6lcHlwT5McXzYNk5h3/W5wCrw6EZHDkhMDVKFWdxHUxYFmhoWG4+7/amhc7D50dWiCBcFmS3leb5FPfG2dHXLv2N00S4jWuljAORjYGp4R6ThoOJhq29cBBYI7HsTGEhvuTJ0/WlM02r1+3XrdsxlRyKmsOidCh8Nrrr2vmxUHPXbkba7DXFRHAPuDs7GxWndWIiooWddVqA73z/F2dL2257HsNeYe0R9I0Qe97fR/l6xFNnvyo8SUUZMDCZwla6mx5w+UvS4LtG0V9Zqfy9PTU1bzYqRkPpQWSjxZpUWjDoxOlPtAL+sGHH5ikV8qeP3++SccneC087JSuxtC+fTvN1SEKaMynB9TcgXMpQkcINyVQwIHHgGq9Zzd37lzNNmuBYT8vvfSSZjtIKN67G8+zWdeeiSyftriLAe1+fI/qGEM+H6H5nz+v+Tz4gaBDhCYKrfbrCR14XB6plef1jCZNfiSz5MIsjNj/vVjYrCa9GvKz7Ydvw1wahfzqs7l0faKr7k4u7LR6jgp2ZnOM7PT4UdNRp6ew82/cuFGzk/Ia7Wx65dP+VFSorTEyLYmRu9ToDRpebyyh0Z7hIQqoyfKaukyKcBJt3FSrvnUhMSERL774gihHnRffgY+3T6ORH0moe/e3TMqhcGrv5+unTlIv+C42bbLSdLbx/fPDweel1wfoaGLMIjdToGan14/Vwk0iaE7Ryvd6RZMlP76ExMJMWOxZIrayUROesXDau+ikTaOs/cvPL8CAAQNNOocio0eN1hw8rC+ntVqdjZ2WZ32oY9u0QI3olVdeNsmD8syztaeLxuDSNAbPapV/X4f7RLiFVr0Jhfz0ND8OZNqHeBocdzW5FGEe9JQbOxz4MaETSV0uhaspaKA3F3QGME5Rqx3U/DaZaTs0ByS/t9/ublIOhe9hm/s2dZJ6wdnDxEkTTfKjsB/RLltf/fk7Q1h8fHwwf/4CEZTO9MrHR52vUl9qjVrrla9XNEnyI4UVVZRg6uHf69zmxpj8Ptz3rTjY5lJAEmAM2TvvvmPSOZQO8v33P2h+HTmYqTFqTd14jdtBaaUzBn9nTJnSWdXC+EHGEWqBNju9nZup8XCPv7rKZ7sf09H8SH517fV3qeAGEVrPjcKNCs6ePatOogs6q1595VXNdvAjQBsX7YKNAa5TZtiMSTnV75zB3PURlTH4fLnzjN7uPNTk6traTAssn9uAURukw02vjyhCs0FzQZMkP4azWEfvxT80nBtaQm/vyzvmiAXSlwJ2Ksay6TkN2KG5blcNpsvJyUWf3oaVAGoRWoDbtno7LX+32mSlrb1Vr1vVOiaT6bg7L43d6jQUToXZrrpAe5GesZz2QoZ01Ff/iwHz/POPP3VtlSNGjBB7H5oLJUxJqx0UlsNVLuaQEuumrBjRQkF+gW4sI4Vxiwx10UtvDN6TlJQs3rFezB49tOpnwXQpKaliyzC9cnidwg8kl8IxbEidN4XP7GpsbHC10OTIj3a7U9nx4oASNcnpCcnvbueROJx2Rp1dg8CXTpJSdwpFePYFtx9Xg+m4SeZTTz5lkoYdip1ZHdSrBQ5IRuTrkR/DNLSCfFk+w2P0tsnidC8w4GCdnbouzZVt4FKws9FnzSIN3kMNlbue0M5YX7mckuu1mQ4ec8pUwLJYrh6ZUl5+5WXhtNLbvJPX+Bvf9cQJE8Uuzlr3kRi5WanWM1OeG22ZXJKmF1zMa8yHwfHcVFSPtDt36SzMKsbmAv4/69i3b19BwtRE63tW/J0rddT5K/U9evRoTT0FYeZkIyI8HAH+/ggNPYXMrFxUVpq2Q0FVZQWiwkJE6FJE5DnNNjcVNDnyYyzfghNWuNHW0oTk6hJOjz868NMl7QLBjsEdmLUGIjsGw0w4PVSDL5h2Ka3dQ5iODgwtJ4kxmAfL59REnYci9CzSNqfuUPyb3rq6Ftazw585c0aUQdHKg+tW9VansB0jR4xAgH9ADWmohflym6+tW7eiZ8+eIrCWz5Makh54P+9Tl0cRWpqLq0ld6wLvpb2LG4Gq8zMWfsgYXsPgasbrKc+Fdlmuhli9ejXeevMtETtHO29cnOEgc3VZtGNyb0dd0urcGe+9+57YLIIfD2UdMYXxhiQ97nbN+urlQbHsayn6nlIH/kvnjfFKFgbRM1KBu/Io79hYSJaHDx0WU3WtsniN54mI+ysrcGSfN0Z8OFj06wfu74InnnwK/QZ8iBNhpn1QQWJ0ON5/6w1hKpk8ZwXKylkP9V1NA02O/KLzkvHYtkkm5GaOtLa1hMd57TCU+qB0Dr2dVdgxuLBda3kY0/LsBS0NgOm4Db1ebJ4C5kENQG9VhJIXF9lzt15juxXTstPr2Yoo7IzcbmnmzJliuyoGYxt3YP4/Bwy1S3VaYxG7oEyaLFaDcBcWelcpPIyHOz6ToPn8WFcKV7vwvBBuha8Gy+SqDb3VLLweExOrTlYvmO9PP/6o+T6Mhb+LeLpOHcWGDXz33d7oJq4Zp2U7BgwcoLlMjc+MK2e0yMRY+ExofuCHkLu4jB83Xjh51GWphfkqq1sUrY79lJtA8Lq6XH4wOD0msfNjRnspp8Sc7nJfQ+XdqMuhcMqtaOpngg7jhWeexvTZnyMoPBLZmZnYuPYnPPBAF4z55AsUFpva1ysryuG44X949LEn8UTXR9HlyW7IzCsxeWZNBU2O/DzOH8bN9oNMiM0caWHbH697zRO7vjYUfEGcUlIjUHcKpRNyeqblDWOnrGvKyDi1+oJIFfLl9FKdh7GQxL777jsT4uJuLnrTXuO68F+D4+Z7k07JvxmbVteedEoeykoOheT4/1oDi38/88yzwlusXlLG8rhbttZzo7z26mtCi7kYcMnXiJEjTPJUi1J/pd7G/1/rvk4dxU416uWJbAM99O++965mOq2y9P7WEmpdnMYba3LUrPmu2RfU9yv58l2QWPmvQvL8V688evqZr0ErrcDXcyahy6MvIviMYUMGlluUnytmHvHxSajQ+JilnY/Eu6+9jNUbt8F7x3Z0ffo1hJ5NaZQojMuBJkd+S0/a48YGnt6uCJe8MR5wfODqBj9wvmAuG9LTQthxuOeeFmFwUNMwr05DYQdlpL/y1dYD8+E9M2fO0iUDCjvzDs8d6uRiUD7xhLbDQ0vowNACp33Lli1H+3btTYJsL1Y44DjVUi/LY3u5vbzWIOYz4FRdTZjmgnkzrIaaqN6Ab6iwnpMmTTSpE8tycNgstutqrLKYD3fhWb9+fa312Own1LIZb9pYZVFo0lC2yi/JScVLjz6IWQt/RmlZ7Y+9QsBqkDB/++pTPPBEN5yOz0LoieN44Znn4O53st6+f7XQ5MjvXe8vL5r8DATYH3c6jcDXQQ7IKdW3NanBF0SS0pvy8sg/djo12BF43q5WYLLyZecOvFodRg3eQ2+y3vZIFE6d6FxRgwOSO9HUZfdThN7s0NBQdRY1oEfxq6Vfif371GkvRrgJJ8tTPwOaAmgS0BrEJD9qp5cycFgeNWLuXlzXB8UcoTbMoyXpyFG3g6BmT089t91Sp22osK7sT9y3UU20BMvnUkWSo9YmGg0R9neWZbxPYEHyWTx2fyfMW7KmhvyqKiuRnpqM2JgY5OarTThVOH1sPx7q0hkvvzsER48Hwdd7J15+8Vks+t4K5RptaApocuT3itc83HAJ5KcQ4P85Dcd3IU5ma4DsZF9++aVJ56BwcHLakJmRqU4mBueZ02c0F5UL8uvUURjLzQVDWbh3nBYJc1BwLaneSg2Gq3BH4/oIkLYi4y3Y1eAgoJOCa5i5/+DFEAfT8BCntf9bi8zMTBPC4N9czaJnfOc0jANcna6h4HvltJT2vPo2idUStoOmEG4jRqdVXfVhWdw1mTsjX8wzo5A8p0yeIpxTet5ogv2OzhqG9dTl2a5LHn74EUyYMF4EnRt/ZMpLCjGybw888fTzcN/tL5xSh/x2Y+igfhg5Zhri03JRkJ2OgP0ByM7NR0lhHj6bOl6MgU4dO+Kpp5/C0888i0ceeRD9hnyC/MJSZCTHI/DgUeEp1mnSFUeTI78ePksuSfNThIHPdzmPxLIgB7HbS31L3xgDRWKhd65zp9pCMpkxfYauvW/rVjfRAdXpunTuIgYcNUNzwc5OkqUNkYOOAc8kQgo716JFX+oOCF7nJqErV67Cc88/Zzi3VbUzDf/meQ31BfoyL7aN3r9ly5aJZVV0qOgNauXcWWqtDMb+4YcfhTah2IvU4DUu96P2YvLMO3cWWzRxay+ttA0F8+C749GffMfUfDmF1W1Lhw7i2bHNtK9Sa9Vrhxq8Lzs7R5A+7bfKGcTqMozL4r/sJ7QpMwZRLF+rI5xEAetDmyjNMVxBxDzqK4v9iIHOjFygI4oOPLV2zXwDdrujV4/38ERXw6qf555/AROmzEREbAoqykqx5qu56PLg4/DyO4bww/vw1uuvYe2mbcjLLxD9PT46Au+9+hLe6tEP8ckZmDtuKB5+4iUkZlzdrbSM0eTI76sge9xo07AwFz2hBvhvx6Hot/drxNRz2DE3iOTaXG61pJbAwINiqqn10sQgjo8XWoo6HaUhG4Aq4P2sT8zZGBFawjW7lF27domy6sqPv4kQirAwMQ379NNPBdnRk0e7JI83ZD7qDq8HJb/Y2DgRTvPTTz+JczN4jCankxTGmC2YvwB//fmXWKHAkIy6goMVUFPltFT9zCh8F/URdEPB+nCwU2OiE4Ee7ylTPhHPhsJDoLjBAj2l9J5TY69L+6oLbD93vfY/4I81a37FnNlzhEZIUwJPWeMGqNxm/5sV3witkjtw8wN8MWXxXVK7Zh48NpPHf44dM1a0SXlHPJp00cJFYlcbhucoMYF65VWUl+FcTDT2+/mJj3tQcBgysw0xflVVlYgKD4K3jx9y8wsRFXoCXjt3IzOXnmJD+vLSYvju3glPr93Izi1A8NGD8A88KhwlemVeaTQ58vNNCsHtjsNMiOxiRZwGZdsXD22bBN/kkEs62OhqgZ3lYjoM07CDq+Vi8iKUeqjzu9R8rwbqasvFPm89GJdDMqWQHC9XWXrtuhzlXctocuQXX5CO57fPMCGxSxVOgzu7jsO84xtwPj+tTi3weoPS4Ruz0xvn2Zj5Xg1cqXaon9nlLE9dzuUs61pFkyO/8qoKrAh1Fmd3qgnsUoXTYJ718eqOOfCMP1q9hbaEhERzRJMjP2pkPMWpt/di3HAZCJDCqTCn1sP3rcKB1HCUm2n/kpCQuH7Q5MiP4PrcyNxEdHIZY0JcjSXUArkD9L8cBuPDfatwOju+WU2FJSSaO5ok+ZGEyior4BR7AHc4Db/kuL+6RJBg9Unx0w/9hsC0CBSWl0galJC4ztEkyY9QTmvzij+Ge7d8bEJajS2cCpMEeQ5wP9/l2JsUjOLyUqkNSkhcp2iy5KeAU2A6J8T+fjaXTwM0FnqGb7Lth3d2L8TGyN1ip5lrMURGQkJCH02e/Kh50St7PCMag3xX4Gb7us/zaCzhdJh7BLay7YeH3SZi4qH/wSvhOArKiqU2KCFxHaDJkx9BsqmsqkRuaSGWhWzG7Zs/EM4KNWFdLjHYBfuL/QIfdJuEZcGbEZYVh+zSAhkuIyFxjeKaID8FJBk6QvYlh2Kw3wrcaN3HhKgutygrRu5yHoG3d36Bz49vgk9SkCBmEUyqrrSEhESTxDVFfoSiBdIG551wEg9sHY8WNhYmJHW5hdqgohG2srXEvc4jMffY3ziQHC68xayjJEIJiaaLa478FJAE6QzhoeZ/Ru4UOzi3ISFdIaeIsRjsgyTCvrjVfhAe3DYZw/atwk/hW3EgJRxJhZnV02NJhxISTQXXLPkpUEgwozgXLrEB6O2zBP90GCwISU1SV0oMU+P+4rD1/zgMFlphP98VWBXqitPZCeJ8Ye4zaPhPQkLiauCaJz9jkFCKykuFDW7Kof/hEbdJuIFT4qugDaqFexRyvXIrGws86j4Fo/1/wo9hrvBOCkJwViwyivOEdighIXFlcF2RH6HYBIsrSnE2Lxm20XthsedrtCEBWdM2ePWIkBqhMkUWYTR2/cUa4w4uo/Dktil42XMWlgY7YGf8ccTlpaKkvPqISKkfSkg0Oq478lNAuqAmyClxaUU5onOT8H2YK7rv/Az3bRklDjpqjB2jL1VqCNHOIIwrbG3dB21sLfGY+1R8sG8lVoW6wDUuEEczIhGZl4iUomzklxUJp48yfZaQkGgYrlvyU0OxDfJQo5OZZ/F3lDfGBvyCp7fPQEsbi2qt0JScrqaQnMV0uXrp3R1OI/Cg20S84jkbPXfNx4f7v8cP4Vthc9YXgakROJefhvyy4mpP8wWboqRGCQlTNBvyU6BQAgmCZMiwlKCMGHwbugWPuU3EnY7DhMeWmqFhinz1tUOKQUO8EGKjrEBpaWspyLsV7Ym2fdHati86b52AgX7fYslJOzHt35sYJNoYm5eCtOJcZJbki49AQXmxWD9NW6O5Bz01FQhSl5t0SlwCmh35GUPQILf8rqoUm6iSCE9ln8e2+MP4NWI7xgf8grd2foHbHYfiRmqHYn/BpkGGxmJMisr0mZoihYTIOESS+Z1OI9HVfSpe2D4L3bzmwcJnCYbtW4lxAasx9fDvWBHqhJ8j3LExeg9c4gKxO/EkAlIjcDIzBmdyEoVmmVqUjaySfOSVFomlfnQw0b5K0wKn4SRSSkWl4eMi/q0W5TcGqhukHMUVZSgqLxEaKwPFmXdaUa4ID4rJS0ZIZhz8U0/BI/4ItsQFiDodS49CYkGmsIkyXwmJi0GzJj8tGLRCwxSZA7W0shyZxXnwTw7HnGN/o9uu+YJQWlr3RAvr3oIQFa1MTUpNUWprjkZkaTdACJ0wwu4opC/a2FiijY0F2lj3QVshvdDWujfa2vZDW/uBuMl+CG5zHIp/Ow4X5Hq388e4Z8totHcZiw4u48S/7beMQbstY8T1/zpTPsZdzh/jDqeR+KfjMNzsMAQ32Q3AzdZ9cPOmd3HLxrdxi3Uvsaa6j+8yrDu9E+FZ55BXWijei7RzSjQGJPmZCWWqTDJMK8pBUGYMPBOO4ZtQZ0wKWI1BvsvxgudstHMZg7b2gwy7UNOOyCV4TSTcpnGlr6FNQix1hO3mM+iNG6x64Qar3uJ53GQ3EO1dRuFpj2no5b0II/Z9h8mBq7E6wgPb44/iZMZZ4dQxxEMqZCch0biQ5NcAGJwHylT5gt2QhEj7WUZJHhILMxGREy/WH2+K9MFXJ+0xJuAX3OE8Ei2s+6CFVbXGaN2neiqt2BWbjn3RPLlQZ7ZBaMA2fUTbRButeooVL2/tXojxgb9iWdBm2ETtFcv/TuckILEoE+klucgrK0JRRamYAhu0umqyk0HgEpcZkvwaCQoxGkjRMG0WU+cqg32LG6PSnsXzg2mz4vZYf0f54OuQzZh3YpNwUFju/Rrv7V6I170+xQvbp+Np96l4fNtkPLx1Iu7fOh53OY1AG05POX2tIRxFSKTGYvyb3j1G91Z7lVvb9Udbu4H4p8MHuN91HB5xm4iu26bgGfepeGn7THTzmov3vReJutLbPO/4RhGbuCHKGzvij+FoehSic5OFdkwbHtstbH1VFTXPRHlGktwkriYk+V1h6JEkHQZ0uHCbrNTiHCQUZggHAwO1eZ4JtcljGdHYmxyCnYkn4HH+CNzOHcTWuAC4xPrDOWY/HM/6wS56L6yjfMQmrH+e9sL60zuw4cxO8bdNlI/4ffNZPzjF7MOW2ANwjfPH1rhAuJ8/LAiZK078UkJxMP20KDMqLwkx+Sk4V5AmtNq04hzklBaKulLjNSY0qa1JXEuQ5CchIdEsIclPQkKiWUKSn4SERLOEJD8JCYlmCUl+EhISzRKS/CQkJJolJPlJSEg0S0jyk5CQaJaQ5CchIdEsIclPQkKiWUKSn4SERLOEJD8JCYlmCUl+EhISzRL/D7MKGTcxrVRQAAAAAElFTkSuQmCC" alt="Logo Empresa" class="h-12 w-auto object-contain rounded-md border p-1 border-gray-200">
+                        <div>
+                            <h3 class="font-bold text-gray-900 text-sm">Personalización del Manual</h3>
+                            <p class="text-xs text-gray-500">Añada el logo oficial de la empresa donde realiza sus pasantías.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <label for="logo-file-input" class="cursor-pointer bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold px-3 py-2 rounded-lg border border-brand-200 transition flex items-center justify-center w-full sm:w-auto">
+                            <i class="fa-solid fa-upload mr-1.5"></i> Cargar Logo (.png / .jpg)
+                        </label>
+                        <input type="file" id="logo-file-input" accept="image/*" class="hidden" onchange="uploadCustomLogo(event)">
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-brand-900 to-brand-700 rounded-2xl p-6 md:p-10 text-white shadow-lg">
+                    <span class="inline-block px-3 py-1 bg-brand-500/30 border border-brand-400/40 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
+                        Documentación Oficial
+                    </span>
+                    <h1 class="text-2xl md:text-4xl font-bold tracking-tight mb-3">
+                        Manual de Usuario para Mantenimiento Preventivo
+                    </h1>
+                    <p class="text-brand-100 text-sm md:text-base max-w-2xl leading-relaxed mb-6">
+                        Guía estándar de procedimientos para la conservación física y lógica de los equipos de cómputo en la empresa **INTERCOS C.A.**
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="showSection('checklist')" class="bg-white text-brand-900 font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-brand-50 transition shadow-sm">
+                            <i class="fa-solid fa-play mr-2 text-brand-600"></i> Iniciar Checklist
+                        </button>
+                        <button onclick="showSection('hardware')" class="bg-brand-800 text-white font-medium px-5 py-2.5 rounded-lg text-sm hover:bg-brand-700 transition border border-brand-600">
+                            Ver Rutinas de Hardware
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6 pt-4">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-brand-100 text-brand-700 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-shield-halved text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">Protección &amp; Vida Útil</h3>
+                        <p class="text-xs text-gray-600">Alarga la durabilidad de los componentes físicos evitando sobrecalentamientos por acumulación de polvo.</p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-gauge-high text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">Rendimiento Óptimo</h3>
+                        <p class="text-xs text-gray-600">Optimiza el software del sistema liberando memoria, depurando temporales y eliminando amenazas.</p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
+                        <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">Control &amp; Seguimiento</h3>
+                        <p class="text-xs text-gray-600">Registra de manera transparente las intervenciones técnicas mediante la bitácora integrada.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. SECCIÓN INTRODUCCIÓN Y ALCANCE -->
+            <section id="introduccion" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">1. Introducción y Alcance</h2>
+                    <p class="text-sm text-gray-500">Propósito institucional y público objetivo de esta guía técnica.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-gray-200 space-y-4">
+                    <h3 class="text-lg font-semibold text-brand-900 border-l-4 border-brand-600 pl-3">Objetivo General</h3>
+                    <p class="text-gray-700 text-sm leading-relaxed">
+                        Establecer un protocolo unificado y estructurado para la ejecución del mantenimiento preventivo de hardware y software en las estaciones de trabajo de **INTERCOS C.A.**, reduciendo en un 85% las incidencias por fallas técnicas no planificadas.
+                    </p>
+
+                    <h3 class="text-lg font-semibold text-brand-900 border-l-4 border-brand-600 pl-3 pt-2">Alcance</h3>
+                    <p class="text-gray-700 text-sm leading-relaxed">
+                        Este manual aplica para todo el personal técnico de soporte, administradores de sistemas y usuarios finales autorizados pertenecientes a las distintas dependencias administrativas y operativas de **INTERCOS C.A.**
+                    </p>
+
+                    <div class="grid sm:grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 bg-brand-50 rounded-lg border border-brand-100">
+                            <h4 class="font-semibold text-brand-900 text-sm mb-1">Responsabilidades del Técnico:</h4>
+                            <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                                <li>Ejecutar la limpieza interna y externa profunda de Hardware.</li>
+                                <li>Actualizar software corporativo y parches del sistema.</li>
+                                <li>Llenar la bitácora oficial tras cada servicio.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h4 class="font-semibold text-gray-900 text-sm mb-1">Responsabilidades del Usuario:</h4>
+                            <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                                <li>Mantener el área de trabajo limpia y despejada.</li>
+                                <li>Notificar ruidos anómalos o lentitud persistente.</li>
+                                <li>No instalar programas no autorizados por TI.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. SECCIÓN HARDWARE -->
+            <section id="hardware" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">2. Mantenimiento Preventivo de Hardware</h2>
+                    <p class="text-sm text-gray-500">Pasos detallados para la revisión física y conservación de componentes.</p>
+                </div>
+
+                <!-- Herramientas recomendadas -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start space-x-3">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="font-semibold text-amber-900 text-sm">Herramientas requeridas antes de iniciar:</h4>
+                        <p class="text-xs text-amber-800 mt-1">Sopladora o aire comprimido, brocha antiestática, pulsera antiestática, destornilladores de estrella (Philips), alcohol isopropílico (99%) y paño de microfibra.</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Paso 1 -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <div class="flex items-center space-x-2 text-brand-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-xs">1</span>
+                            <span>Desconexión Segura</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Apague el equipo por completo. Apague el regulador de voltaje / UPS. Desconecte el cable de alimentación principal y luego los periféricos (teclado, mouse, monitor y red).
+                        </p>
+                    </div>
+
+                    <!-- Paso 2 -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <div class="flex items-center space-x-2 text-brand-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-xs">2</span>
+                            <span>Limpieza Externa</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Limpie el monitor, teclado, mouse y el chasis (Case) con un paño ligeramente humedecido con limpiador neutro o espuma para pantallas. Nunca aplique líquidos directo al equipo.
+                        </p>
+                    </div>
+
+                    <!-- Paso 3 -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <div class="flex items-center space-x-2 text-brand-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-xs">3</span>
+                            <span>Soplado e Higiene Interna</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Retire la tapa lateral del patrullero/chasis. Aplique aire comprimido sosteniendo las aspas de los ventiladores para evitar revólveres mecánicos o daños por inducción eléctrica.
+                        </p>
+                    </div>
+
+                    <!-- Paso 4 -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-2">
+                        <div class="flex items-center space-x-2 text-brand-700 font-bold text-sm">
+                            <span class="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-xs">4</span>
+                            <span>Revisión de Conexiones</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Verifique que los módulos RAM, cables SATA, conectores de la fuente de poder y tarjetas de expansión estén correctamente asentados y firmes en sus ranuras.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. SECCIÓN SOFTWARE -->
+            <section id="software" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">3. Mantenimiento Preventivo de Software</h2>
+                    <p class="text-sm text-gray-500">Procedimientos lógicos para garantizar rapidez y seguridad del sistema operativo.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-broom text-brand-600 mr-2"></i> Limpieza de Archivos Temporales
+                            </h4>
+                            <p class="text-xs text-gray-600">Elimina basura acumulada en el sistema mediante la herramienta ejecutables nativa.</p>
+                        </div>
+                        <div class="bg-gray-100 p-2.5 rounded-lg text-xs font-mono text-gray-800">
+                            Win + R → cleanmgr / %temp%
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-shield-virus text-emerald-600 mr-2"></i> Análisis Antivirus Corporativo
+                            </h4>
+                            <p class="text-xs text-gray-600">Verifica firma de virus actualizada y programa un escaneo profundo (Full Scan).</p>
+                        </div>
+                        <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                            Frecuencia: Semanal
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-box-archive text-purple-600 mr-2"></i> Copia de Seguridad (Backup)
+                            </h4>
+                            <p class="text-xs text-gray-600">Respalda documentos críticos de la empresa INTERCOS C.A. en el servidor en la nube o disco duro externo.</p>
+                        </div>
+                        <span class="inline-block px-3 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full border border-purple-200">
+                            Frecuencia: Quincenal
+                        </span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-hard-drive text-blue-600 mr-2"></i> Optimización de Disco
+                            </h4>
+                            <p class="text-xs text-gray-600">Comprobación de salud del disco duro (SMART) y optimización de unidades mecánicas o SSD.</p>
+                        </div>
+                        <div class="bg-gray-100 p-2.5 rounded-lg text-xs font-mono text-gray-800">
+                            dfrgui.exe
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. CHECKLIST INTERACTIVO -->
+            <section id="checklist" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">4. Checklist de Mantenimiento</h2>
+                        <p class="text-sm text-gray-500">Marca las tareas conforme las vayas ejecutando en el equipo.</p>
+                    </div>
+                    <button onclick="resetChecklist()" class="text-xs text-brand-600 hover:text-brand-800 font-medium">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Reiniciar Lista
+                    </button>
+                </div>
+
+                <!-- Barra de Progreso -->
+                <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
+                    <div class="flex justify-between text-xs font-semibold text-gray-700">
+                        <span>Progreso de Mantenimiento</span>
+                        <span id="checklist-progress-text">0% Completado</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div id="checklist-progress-bar" class="bg-brand-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Items Checklist -->
+                <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Desconexión eléctrica y drenaje de energía estática del equipo.</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Limpieza externa de gabinete, pantalla, monitor, ratón y teclado.</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Retiro de polvo interno mediante aire comprimido sosteniendo ventiladores.</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Verificación y reajuste de cables internos (SATA, Alimentación, RAM).</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Encendido y verificación del POST y comportamiento del sistema.</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Eliminación de archivos temporales (%temp%, prefetch y papelera).</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Actualización de definiciones de Antivirus y escaneo rápido.</span>
+                    </label>
+                    <label class="flex items-center p-4 hover:bg-gray-50 cursor-pointer text-sm">
+                        <input type="checkbox" onchange="updateProgress()" class="chk-item w-4 h-4 text-brand-600 rounded border-gray-300 focus:ring-brand-500">
+                        <span class="ml-3 text-gray-700">Verificación de respaldo de datos (Backup de trabajo).</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- 6. BITÁCORA DE REGISTRO INTERACTIVA -->
+            <section id="bitacora" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">5. Bitácora de Registro de Servicio</h2>
+                        <p class="text-sm text-gray-500">Registra y consulta las intervenciones realizadas a los equipos de INTERCOS C.A.</p>
+                    </div>
+                </div>
+
+                <!-- Formulario para Agregar Registro -->
+                <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-sm text-gray-800">Registrar Nuevo Mantenimiento</h3>
+                    <form id="bitacora-form" class="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <input type="text" id="log-equipo" placeholder="Código de Equipo (Ej: INT-PC-04)" required="" class="text-xs p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <input type="text" id="log-tecnico" placeholder="Nombre de Técnico" required="" class="text-xs p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <select id="log-tipo" class="text-xs p-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="Hardware y Software">Hardware + Software</option>
+                            <option value="Solo Hardware">Solo Hardware</option>
+                            <option value="Solo Software">Solo Software</option>
+                        </select>
+                        <button type="submit" class="bg-brand-600 text-white text-xs font-semibold py-2.5 px-4 rounded-md hover:bg-brand-700 transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Añadir Registro
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tabla de Registros -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-x-auto shadow-sm">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 border-b border-gray-200 text-gray-600 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Fecha</th>
+                                <th class="p-3">Cod. Equipo</th>
+                                <th class="p-3">Técnico Responsable</th>
+                                <th class="p-3">Tipo Servicio</th>
+                                <th class="p-3">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bitacora-table-body" class="divide-y divide-gray-100 text-gray-700">
+                            <tr>
+                                <td class="p-3 font-medium">2026-11-02</td>
+                                <td class="p-3 font-mono">INT-ADM-01</td>
+                                <td class="p-3">Carlos Mendoza</td>
+                                <td class="p-3">Hardware y Software</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Exitoso</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">2026-11-05</td>
+                                <td class="p-3 font-mono">INT-VENT-03</td>
+                                <td class="p-3">María Delgado</td>
+                                <td class="p-3">Solo Hardware</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Exitoso</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. NUEVA SECCIÓN: GLOSARIO DE TÉRMINOS -->
+            <section id="glosario" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">6. Glosario de Términos Técnicos</h2>
+                    <p class="text-sm text-gray-500">Diccionario interactivo de componentes informáticos, software y conceptos de seguridad para INTERCOS C.A.</p>
+                </div>
+
+                <!-- Barra de búsqueda y Filtros por Categoría del Glosario -->
+                <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                        </span>
+                        <input type="text" id="glosario-search" oninput="filterGlosario()" placeholder="Filtrar términos (ej. RAM, Virus, Pasta Térmica)..." class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-300 text-sm text-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="flex flex-wrap gap-2 pt-1" id="glosario-category-filters">
+                        <button onclick="setGlosarioFilter('all')" class="cat-filter-btn active bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-semibold">Todos</button>
+                        <button onclick="setGlosarioFilter('hardware')" class="cat-filter-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold">Hardware</button>
+                        <button onclick="setGlosarioFilter('software')" class="cat-filter-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold">Software</button>
+                        <button onclick="setGlosarioFilter('seguridad')" class="cat-filter-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold">Seguridad &amp; Servicios</button>
+                    </div>
+                </div>
+
+                <!-- Grid de Términos -->
+                <div class="grid md:grid-cols-2 gap-4" id="glosario-grid">
+
+                    <!-- Tarjetas de Hardware -->
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="procesador cpu">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-microchip text-brand-600 mr-2"></i> Procesador (CPU)
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Considerado el "cerebro" del equipo. Es la unidad central de procesamiento encargada de ejecutar las instrucciones de los programas y procesar los datos.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="memoria ram">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-memory text-brand-600 mr-2"></i> Memoria RAM
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Memoria de acceso aleatorio de alta velocidad donde se almacenan temporalmente los datos de los programas en ejecución. Se borra al apagar la computadora.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="case gabinete chasis">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-server text-brand-600 mr-2"></i> Case (Gabinete / Chasis)
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Estructura metálica y de plástico que aloja y protege los componentes internos del computador (tarjeta madre, disco duro, fuente de poder, etc.).</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="fan cooler ventilador disipador">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-fan text-brand-600 mr-2"></i> Fan Cooler (Ventilador)
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Dispositivo de enfriamiento que extrae el aire caliente del interior del case o disipa el calor directo del procesador para prevenir el sobrecalentamiento.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="pasta termica crema disipadora">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-temperature-arrow-down text-brand-600 mr-2"></i> Pasta Térmica
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Sustancia conductora de calor aplicada entre la superficie del procesador y el disipador para optimizar la transferencia térmica y enfriamiento.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="unidad de dvd lector optico">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-compact-disc text-brand-600 mr-2"></i> Unidad de DVD / CD
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Dispositivo óptico que utiliza un láser para leer o escribir información almacenada en discos compactos (CDs) o discos versátiles digitales (DVDs).</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="monitor pantalla">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-desktop text-brand-600 mr-2"></i> Monitor
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Dispositivo periférico de salida visual que muestra la interfaz gráfica, datos, documentos y operaciones realizadas en la computadora.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="cornetas altavoces parlantes audio">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-volume-high text-brand-600 mr-2"></i> Cornetas / Altavoces
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Periféricos de salida de audio que permiten reproducir sonidos del sistema, notificaciones corporativas, videoconferencias o multimedia.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="disco duro ssd almacenamiento hdd">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-hard-drive text-brand-600 mr-2"></i> Disco Duro (HDD / SSD)
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Unidad de almacenamiento permanente donde residen el sistema operativo, los programas y todos los archivos de trabajo de la empresa.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="hardware" data-name="tarjeta madre motherboard placa base">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-chess-board text-brand-600 mr-2"></i> Tarjeta Madre (Motherboard)
+                            </h4>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Hardware</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Placa de circuito impreso principal a la que se conectan todos los componentes del computador, permitiendo la comunicación entre procesador, memoria y periféricos.</p>
+                    </div>
+
+                    <!-- Tarjetas de Software -->
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="software" data-name="software programas sistema">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-code text-emerald-600 mr-2"></i> Software
+                            </h4>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Software</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Conjunto de programas, instrucciones, códigos y reglas informáticas que permiten al hardware realizar tareas específicas en el computador.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="software" data-name="sistema operativo windows linux os">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-brands fa-windows text-emerald-600 mr-2"></i> Sistema Operativo (SO)
+                            </h4>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Software</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Software base (como Windows 10/11) que administra los recursos de hardware de la máquina y proporciona la interfaz para la interacción del usuario.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="soporte tecnico ti asistencia helpdesk">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-headset text-purple-600 mr-2"></i> Soporte Técnico
+                            </h4>
+                            <span class="bg-purple-100 text-purple-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Servicios &amp; TI</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Servicio brindado por el personal de TI para resolver incidencias físicas o lógicas, realizar configuraciones e implementar mantenimientos oportunos.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="backup copia de seguridad respaldo">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-box-archive text-purple-600 mr-2"></i> Backup (Copia de Seguridad)
+                            </h4>
+                            <span class="bg-purple-100 text-purple-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Duplicado de la información crítica de la empresa guardado en un medio secundario o en la nube para garantizar su recuperación ante fallas o ataques.</p>
+                    </div>
+
+                    <!-- Tarjetas de Seguridad y Amenazas -->
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="virus infamacion malware">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-bug text-rose-600 mr-2"></i> Virus Informático
+                            </h4>
+                            <span class="bg-rose-100 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Programa malicioso diseñado para alterarle el funcionamiento normal del equipo sin el permiso del usuario, destruyendo o corrompiendo datos.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="malware programa malicioso threat">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-skull-crossbones text-rose-600 mr-2"></i> Malware
+                            </h4>
+                            <span class="bg-rose-100 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Término general para cualquier código o programa dañino (virus, troyanos, gusanos, spyware) desarrollado para infectar y dañar un sistema.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="ransomware secuestro de datos rescate">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-lock text-rose-600 mr-2"></i> Ransomware
+                            </h4>
+                            <span class="bg-rose-100 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Tipo grave de malware que cifra (bloquea) los archivos de la empresa y exige el pago de un rescate financiero para devolver el acceso a los datos.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="antivirus proteccion escaneo">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-shield-virus text-emerald-600 mr-2"></i> Antivirus
+                            </h4>
+                            <span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Software / Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Software de seguridad diseñado para detectar, bloquear y eliminar virus y amenazas cibernéticas antes de que comprometan el sistema.</p>
+                    </div>
+
+                    <div class="glosario-card bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-brand-300 transition" data-category="seguridad" data-name="parche de seguridad actualizacion update">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-bold text-gray-900 text-sm flex items-center">
+                                <i class="fa-solid fa-wrench text-brand-600 mr-2"></i> Parche de Seguridad
+                            </h4>
+                            <span class="bg-purple-100 text-purple-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Seguridad</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed">Actualización rápida de código lanzada por fabricantes para reparar vulnerabilidades de seguridad descubiertas en sistemas o programas.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 8. NUEVA SECCIÓN: VIDEO TUTORIAL PRÁCTICO -->
+            <section id="video-tutorial" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider mb-1 inline-block">Demostración Práctica</span>
+                    <h2 class="text-2xl font-bold text-gray-900">7. Video Tutorial de Soporte Técnico en Vivo</h2>
+                    <p class="text-sm text-gray-500">Guía audiovisual paso a paso de la ejecución real del mantenimiento preventivo a los equipos de INTERCOS C.A.</p>
+                </div>
+
+                <!-- Tarjeta Principal del Video -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm space-y-0">
+                    <!-- Marcos / Contenedor Aspect Ratio 16:9 -->
+                    <div class="relative w-full aspect-video bg-gray-900 flex items-center justify-center group">
+                        <!-- Reproductor de Ejemplo / Placeholder HTML5 -->
+                        <video id="tutorial-video-player" class="w-full h-full object-cover" controls="" poster="https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?q=80&amp;w=1200&amp;auto=format&amp;fit=crop">
+                            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                            Tu navegador no soporta la reproducción de video HTML5.
+                        </video>
+                    </div>
+
+                    <!-- Información y Controles del Video -->
+                    <div class="p-5 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-base">Práctica en Campo: Mantenimiento Preventivo Completo</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Grabado en las instalaciones de INTERCOS C.A. • Duración estimada: ~10 mins</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-brand-50 text-brand-700 text-xs font-semibold px-3 py-1 rounded-full border border-brand-200 flex items-center">
+                                    <i class="fa-solid fa-video text-brand-600 mr-1.5"></i> HD 1080p
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Marcas de Tiempo / Índice Interactivo del Video -->
+                        <div>
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-gray-500 mb-3">Índice por Marcas de Tiempo (Timestamps)</h4>
+                            <div class="grid sm:grid-cols-2 gap-2 text-xs">
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">1. Inspección inicial y desconexión</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">00:00</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">2. Destapado de Case y extracción del polvo</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">01:30</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">3. Limpieza de RAM y Fan Cooler</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">03:45</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">4. Reemplazo de pasta térmica</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">05:20</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">5. Ensamblaje y prueba de encendido</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">07:10</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-brand-50 rounded-lg border border-gray-200 transition cursor-pointer">
+                                    <span class="font-medium text-gray-800">6. Depuración de software y temporales</span>
+                                    <span class="font-mono bg-white px-2 py-0.5 rounded text-brand-700 font-bold border border-gray-200">08:50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caja de instrucciones de sustitución del enlace de video -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs space-y-2">
+                    <div class="flex items-center text-blue-900 font-bold text-sm">
+                        <i class="fa-solid fa-code mr-2 text-blue-600"></i> ¿Cómo insertar su video una vez grabado hoy?
+                    </div>
+                    <p class="text-blue-800 leading-relaxed">
+                        Si suben el video a **YouTube**, reemplacen el bloque del reproductor `<video>` por el código de inserción (Embed):
+                    </video></p>
+                    <div class="bg-gray-900 text-gray-100 p-2.5 rounded-md font-mono text-[11px] overflow-x-auto">
+                        &lt;iframe class="w-full h-full" src="https://www.youtube.com/embed/TU_CODIGO_DE_VIDEO" allowfullscreen&gt;&lt;/iframe&gt;
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. PREGUNTAS FRECUENTES -->
+            <section id="faq" class="content-section space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">6. Preguntas Frecuentes (FAQ)</h2>
+                    <p class="text-sm text-gray-500">Respuestas rápidas a situaciones comunes durante el mantenimiento.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <h4 class="font-bold text-blue-900 text-sm mb-1 flex items-center"><i class="fa-solid fa-floppy-disk text-blue-600 mr-2"></i> ¿Cómo guardar o compartir esta página web?</h4>
+                        <p class="text-xs text-blue-800 leading-relaxed">
+                            1. Haga clic en el botón verde **"Guardar Web (.html)"** arriba a la derecha. Se descargará el archivo `manual_mantenimiento_intercos.html` directo a su computadora.<br>
+                            2. También puede presionar <strong>Ctrl + S</strong> (o <strong>Cmd + S</strong> en Mac) en su teclado y guardar la página como "Página web completa".<br>
+                            3. Puede enviar este archivo por correo o guardarlo en un pendrive para llevarlo a la empresa.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 class="font-bold text-gray-900 text-sm mb-1">¿Cada cuánto tiempo se debe hacer el mantenimiento preventivo en INTERCOS C.A.?</h4>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Se recomienda una rutina de **mantenimiento de software de forma mensual** y una revisión profunda de **hardware cada 3 a 6 meses**, dependiendo del entorno físico donde se encuentre la computadora.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 class="font-bold text-gray-900 text-sm mb-1">¿Qué hacer si el equipo no enciende después de la limpieza interna?</h4>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            Verifique en primer lugar la conexión del cable de energía. Si el gabinete enciende pero no da video, retire con cuidado la memoria RAM, limpie sus contactos dorados con una goma de borrar blanca y vuelva a insertarla con firmeza.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-4">
+                        <h4 class="font-bold text-gray-900 text-sm mb-1">¿Puedo usar alcohol común (70%) para limpiar tarjetas del sistema?</h4>
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            No. Debe utilizar únicamente **alcohol isopropílico de alta pureza (99%)**, ya que el alcohol común contiene porcentaje de agua que puede causar cortocircuitos o corrosión en la placa base.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Carga de Logo Personalizado local
+        function uploadCustomLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoDataUrl = e.target.result;
+                    document.getElementById('company-logo-img').src = logoDataUrl;
+                    document.getElementById('main-banner-logo').src = logoDataUrl;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Función para descargar el archivo HTML completo del manual
+        function downloadHTMLFile() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'manual_mantenimiento_intercos.html';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Control de secciones
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Quitar clase activa de links
+            const links = document.querySelectorAll('.sidebar-link');
+            links.forEach(link => link.classList.remove('active'));
+
+            // Mostrar la sección seleccionada
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Activar link de la barra lateral
+            const targetLink = document.getElementById(`link-${sectionId}`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+
+            // Cerrar menú móvil si está abierto
+            closeMobileSidebar();
+
+            // Desplazar arriba
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toggle del menú móvil
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function openMobileSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        mobileMenuBtn.addEventListener('click', () => {
+            if (sidebar.classList.contains('-translate-x-full')) {
+                openMobileSidebar();
+            } else {
+                closeMobileSidebar();
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+        // Actualizar barra de progreso del checklist
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.chk-item');
+            const total = checkboxes.length;
+            let checked = 0;
+
+            checkboxes.forEach(chk => {
+                if (chk.checked) checked++;
+            });
+
+            const percent = Math.round((checked / total) * 100);
+            const progressBar = document.getElementById('checklist-progress-bar');
+            const progressText = document.getElementById('checklist-progress-text');
+
+            progressBar.style.width = percent + '%';
+            progressText.textContent = percent + '% Completado';
+
+            if (percent === 100) {
+                progressBar.classList.remove('bg-brand-500');
+                progressBar.classList.add('bg-emerald-500');
+            } else {
+                progressBar.classList.remove('bg-emerald-500');
+                progressBar.classList.add('bg-brand-500');
+            }
+        }
+
+        function resetChecklist() {
+            const checkboxes = document.querySelectorAll('.chk-item');
+            checkboxes.forEach(chk => chk.checked = false);
+            updateProgress();
+        }
+
+        // Manejo de la bitácora interactiva
+        const bitacoraForm = document.getElementById('bitacora-form');
+        const bitacoraTableBody = document.getElementById('bitacora-table-body');
+
+        bitacoraForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const equipo = document.getElementById('log-equipo').value.trim();
+            const tecnico = document.getElementById('log-tecnico').value.trim();
+            const tipo = document.getElementById('log-tipo').value;
+            const fecha = new Date().toISOString().split('T')[0];
+
+            if (equipo && tecnico) {
+                const newRow = document.createElement('tr');
+                newRow.className = 'hover:bg-gray-50';
+                newRow.innerHTML = `
+                    <td class="p-3 font-medium">${fecha}</td>
+                    <td class="p-3 font-mono">${equipo.toUpperCase()}</td>
+                    <td class="p-3">${tecnico}</td>
+                    <td class="p-3">${tipo}</td>
+                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">Exitoso</span></td>
+                `;
+                bitacoraTableBody.prepend(newRow);
+
+                // Limpiar inputs
+                document.getElementById('log-equipo').value = '';
+                document.getElementById('log-tecnico').value = '';
+            }
+        });
+
+        // Búsqueda simple en el manual
+        const searchInput = document.getElementById('global-search');
+        searchInput.addEventListener('keyup', function(e) {
+            const query = e.target.value.toLowerCase();
+            if (!query) return;
+
+            // Si presiona enter busca el texto en las secciones y redirige a la más afín
+            if (e.key === 'Enter') {
+                if (query.includes('hard') || query.includes('limpia') || query.includes('polvo') || query.includes('cables')) {
+                    showSection('hardware');
+                } else if (query.includes('soft') || query.includes('virus') || query.includes('temp') || query.includes('backup')) {
+                    showSection('software');
+                } else if (query.includes('check') || query.includes('paso') || query.includes('lista')) {
+                    showSection('checklist');
+                } else if (query.includes('bita') || query.includes('registro') || query.includes('equipo')) {
+                    showSection('bitacora');
+                } else if (query.includes('glo') || query.includes('que es') || query.includes('definicion') || query.includes('ram') || query.includes('cpu')) {
+                    showSection('glosario');
+                    document.getElementById('glosario-search').value = query;
+                    filterGlosario();
+                } else if (query.includes('video') || query.includes('tuto') || query.includes('demostracion') || query.includes('ver')) {
+                    showSection('video-tutorial');
+                } else if (query.includes('duda') || query.includes('faq') || query.includes('pregunt')) {
+                    showSection('faq');
+                } else {
+                    showSection('introduccion');
+                }
+            }
+        });
+
+        // Filtrado y categoría del Glosario de Términos
+        let currentGlosarioCategory = 'all';
+
+        function setGlosarioFilter(cat) {
+            currentGlosarioCategory = cat;
+            
+            // Estilos de botones de categoría
+            const buttons = document.querySelectorAll('#glosario-category-filters button');
+            buttons.forEach(btn => {
+                btn.className = 'cat-filter-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold';
+            });
+            event.target.className = 'cat-filter-btn active bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-semibold';
+
+            filterGlosario();
+        }
+
+        function filterGlosario() {
+            const query = document.getElementById('glosario-search').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.glosario-card');
+
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const name = card.getAttribute('data-name');
+                const text = card.textContent.toLowerCase();
+
+                const matchesCat = (currentGlosarioCategory === 'all' || category === currentGlosarioCategory || (currentGlosarioCategory === 'software' && category === 'software'));
+                const matchesSearch = !query || name.includes(query) || text.includes(query);
+
+                if (matchesCat && matchesSearch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body></html>
